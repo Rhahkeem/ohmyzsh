@@ -98,7 +98,7 @@ alias gcf='git config --list'
 
 function gccd() {
   command git clone --recurse-submodules "$@"
-  [[ -d "$_" ]] && cd "$_" || cd "${${_:t}%.git}"
+  [[ -d "$_" ]] && cd "$_" || cd "${${_:h}%.git}"
 }
 compdef _git gccd=git-clone
 
