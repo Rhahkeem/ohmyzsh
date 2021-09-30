@@ -10,13 +10,11 @@ fi
 # - auto: the update is performed automatically when it's time
 # - reminder: a reminder is shown to the user when it's time to update
 # - disabled: automatic update is turned off
-zstyle -s ':omz:update' mode update_mode || {
-  update_mode=prompt
+zstyle -s ':omz:update' mode update_mode || update_mode=prompt
 
-  # If the mode zstyle setting is not set, support old-style settings
-  [[ "$DISABLE_UPDATE_PROMPT" != true ]] || update_mode=auto
-  [[ "$DISABLE_AUTO_UPDATE" != true ]] || update_mode=disabled
-}
+# Support old-style settings
+[[ "$DISABLE_UPDATE_PROMPT" != true ]] || update_mode=auto
+[[ "$DISABLE_AUTO_UPDATE" != true ]] || update_mode=disabled
 
 # Cancel update if:
 # - the automatic update is disabled.
@@ -150,8 +148,6 @@ function has_typed_input() {
   #  the shell actually exits what it's running.
   trap "
     ret=\$?
-    unset update_mode
-    unset -f current_epoch is_update_available update_last_updated_file update_ohmyzsh 2>/dev/null
     command rm -rf '$ZSH/log/update.lock'
     return \$ret
   " EXIT INT QUIT
@@ -169,10 +165,22 @@ function has_typed_input() {
     return
   fi
 
-  # Test if Oh My Zsh directory is a git repository
-  if ! (builtin cd -q "$ZSH" && LANG= git rev-parse &>/dev/null); then
-    echo >&2 "[oh-my-zsh] Can't update: not a git repository."
-    return
+  # Ask for confirmation before updating unless in auto mode
+  if [[ "$update_mode" = auto ]]; then
+    update_ohmyzsh
+  else
+    # input sink to swallow all characters typed before the prompt
+    # and add a newline if there wasn't one after characters typed
+    while read -t -k 1 option; do true; done
+    [[ "$option" != ($'\n'|"") ]] && echo
+
+    echo -n "[oh-my-zsh] Would you like to update? [Y/n] "
+    read -r -k 1 option
+    [[ "$option" != $'\n' ]] && echo
+    case "$option" in
+      [yY$'\n']) update_ohmyzsh ;;
+      [nN]) update_last_updated_file ;;
+    esac
   fi
 
   # Check if there are updates available before proceeding
@@ -206,4 +214,4 @@ function has_typed_input() {
 }
 
 unset update_mode
-unset -f current_epoch is_update_available update_last_updated_file update_ohmyzsh
+unset -f current_epoch update_last_updated_file update_ohmyzsh
