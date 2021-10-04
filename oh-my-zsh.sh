@@ -2,14 +2,14 @@
 [ -n "$ZSH_VERSION" ] || {
   # ANSI formatting function (\033[<code>m)
   # 0: reset, 1: bold, 4: underline, 22: no bold, 24: no underline, 31: red, 33: yellow
-  omz_f() {
+  f() {
     [ $# -gt 0 ] || return
     IFS=";" printf "\033[%sm" $*
   }
   # If stdout is not a terminal ignore all formatting
-  [ -t 1 ] || omz_f() { :; }
+  [ -t 1 ] || f() { :; }
 
-  omz_ptree() {
+  ptree() {
     # Get process tree of the current process
     pid=$$; pids="$pid"
     while [ ${pid-0} -ne 1 ] && ppid=$(ps -e -o pid,ppid | awk "\$1 == $pid { print \$2 }"); do
@@ -28,11 +28,11 @@
 
   {
     shell=$(ps -o pid,comm | awk "\$1 == $$ { print \$2 }")
-    printf "$(omz_f 1 31)Error:$(omz_f 22) Oh My Zsh can't be loaded from: $(omz_f 1)${shell}$(omz_f 22). "
-    printf "You need to run $(omz_f 1)zsh$(omz_f 22) instead.$(omz_f 0)\n"
-    printf "$(omz_f 33)Here's the process tree:$(omz_f 22)\n\n"
-    omz_ptree
-    printf "$(omz_f 0)\n"
+    printf "$(f 1 31)Error:$(f 22) Oh My Zsh can't be loaded from: $(f 1)${shell}$(f 22). "
+    printf "You need to run $(f 1)zsh$(f 22) instead.$(f 0)\n"
+    printf "$(f 33)Here's the process tree:$(f 22)\n\n"
+    ptree
+    printf "$(f 0)\n"
   } >&2
 
   return 1
@@ -113,7 +113,7 @@ zcompdump_fpath="#omz fpath: $fpath"
 
 # Delete the zcompdump file if OMZ zcompdump metadata changed
 if ! command grep -q -Fx "$zcompdump_revision" "$ZSH_COMPDUMP" 2>/dev/null \
-   || ! command grep -q -Fx "$zcompdump_fpath" "$ZSH_COMPDUMP" 2>/dev/null; then
+  q || ! command grep -q -Fx "$zcompdump_fpath" "$ZSH_COMPDUMP" 2>/dev/null; then
   command rm -f "$ZSH_COMPDUMP"
   zcompdump_refresh=1
 fi
