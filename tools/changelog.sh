@@ -128,7 +128,9 @@ function parse-commit {
   }
 
   # Parse commit with hash $1
-  local hash="$1" subject="$2" body="$3" warning rhash
+  local hash="$1" subject body type warning rhash
+  subject="$(command git show -s --format=%s $hash)"
+  body="$(command git show -s --format=%b $hash)"
 
   # Commits following Conventional Commits (https://www.conventionalcommits.org/)
   # have the following format, where parts between [] are optional:
@@ -138,8 +140,12 @@ function parse-commit {
   #  commit body
   #  [BREAKING CHANGE: warning]
 
+  # if commit type is not going to be displayed, do nothing else
+  type="$(commit:type "$subject")"
+  (( ${MAIN_TYPES[(Ie)$type]} || ${OTHER_TYPES[(Ie)$type]} )) || return
+
   # commits holds the commit type
-  types[$hash]="$(commit:type "$subject")"
+  commits[$hash]="$type"
   # scopes holds the commit scope
   scopes[$hash]="$(commit:scope "$subject")"
   # subjects holds the commit subject
