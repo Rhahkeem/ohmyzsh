@@ -8,7 +8,7 @@ fi
 
 # If method undefined, find the first one that is installed
 if [[ -z "$JSONTOOLS_METHOD" ]]; then
-  for JSONTOOLS_METHOD in node python3 ruby; do
+  for JSONTOOLS_METHOD in node python ruby; do
     # If method found, break out of loop
     (( $+commands[$JSONTOOLS_METHOD] )) && break
     # Otherwise unset the variable
