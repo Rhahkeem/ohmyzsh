@@ -113,7 +113,7 @@ elif [[ "$OSTYPE" = linux*  ]]; then
       #   Battery #1     : Unknown, 99.55%
       #   Battery #2     : Discharging, 49.58%, 01:12:05
       #   All batteries  : 62.60%, 02:03:03
-      acpitool 2>/dev/null | command awk -F, '
+      local -i pct=$(acpitool 2>/dev/null | command awk -F, '
         /^\s+All batteries/ {
           gsub(/[^0-9.]/, "", $1)
           pct=$1
@@ -124,7 +124,8 @@ elif [[ "$OSTYPE" = linux*  ]]; then
           pct=$2
         }
         END { print pct }
-        '
+        ')
+      echo $pct
     elif (( $+commands[acpi] )); then
       # Sample output:
       # Battery 0: Discharging, 0%, rate information unavailable
