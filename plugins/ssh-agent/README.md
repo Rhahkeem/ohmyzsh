@@ -23,14 +23,20 @@ zstyle :omz:plugins:ssh-agent agent-forwarding yes
 
 ### `helper`
 
-To set an **external helper** to ask for the passwords and possibly store
-them in the system keychain use the `helper` style. For example:
+To **NOT load any identities on start** use the `lazy` setting. This is particularly
+useful when combined with the `AddKeysToAgent` setting (available since OpenSSH 7.2),
+since it allows to enter the password only on first use. _NOTE: you can know your
+OpenSSH version with `ssh -V`._
 
 ```zsh
-zstyle :omz:plugins:ssh-agent helper ksshaskpass
+zstyle :omz:plugins:ssh-agent lazy yes
 ```
 
-### `identities`
+You can enable `AddKeysToAgent` by passing `-o AddKeysToAgent=yes` to the `ssh` command,
+or by adding `AddKeysToAgent yes` to your `~/.ssh/config` file [1].
+See the [OpenSSH 7.2 Release Notes](http://www.openssh.com/txt/release-7.2).
+
+----
 
 To **load multiple identities** use the `identities` style (**this has no effect
 if the `lazy` setting is enabled**). For example:
